@@ -1,9 +1,5 @@
 # !/bin/env python
-import json
-import boto3
-import base64
-import os.path
-from os import path
+import json, os, boto3, base64
 from botocore.exceptions import ClientError
 
 def getSecretKeys():
@@ -34,7 +30,7 @@ def get_secret(secret_name):
     except ClientError as e:
         raise e
     else:
-        if 'SecretString' in get_secret_value_response:
+        if 'SecretString' in get_secret_value_response and get_secret_value_response['SecretString']:
             secret = get_secret_value_response['SecretString']
             return secret
         else:
@@ -45,6 +41,15 @@ def loadSecret(prefix, secret_name, secretFile):
     print("Saving", secret_name, "serects to", secretFile)
     data=get_secret(secret_name)
     secret = json.loads(data)
+    # Mocking the response for testing locally
+    # secret = {
+    #             "username": "admin",
+    #             "engine": "mysql",
+    #             "dbClusterIdentifier": "test-aurora-db",
+    #             "host": "test-aurora-db.cluster-cod3pq4hnlrh.ap-southeast-1.rds.amazonaws.com",
+    #             "password": "8h?o[R;2qZMa)Tbq[Pt69AhjXFx#X$*>",
+    #             "port": 3306
+    #         }
     secretFile.write("export " + prefix + "USERNAME="+"'"+ secret["username"]+"'"+ "\n")
     secretFile.write("export " + prefix + "PASSWORD="+"'"+  secret["password"]+"'"+ "\n")
     secretFile.write("export " + prefix + "HOST="+"'"+  secret["host"]+"'"+ "\n")
@@ -58,7 +63,7 @@ secretFileName = getSecretFileName()
 secretFile = open(secretFileName,"w")
 try:
     for (key, secret_name) in allSecrets.items():
-        prefix = key.split("_")[1]
+        prefix = key.split("_")[1] + "_"
         loadSecret(prefix, secret_name, secretFile)
 finally:
     secretFile.close()
