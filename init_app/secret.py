@@ -16,6 +16,10 @@ def getSecretKeys():
     else:
         raise ValueError("Secret manager Key not found")
 
+def getSecretFileName():
+    secretFile = os.environ["SECRET_FILE_PATH"]
+    return secretFile
+
 def get_secret(secret_name):
     region_name = "ap-southeast-1"
     session = boto3.session.Session()
@@ -38,23 +42,24 @@ def get_secret(secret_name):
             return decoded_binary_secret
 
 def loadSecret(prefix, secret_name, secretFile):
-    if path.exists("/secret/secret.env") :
-        print("Secrets Already exists")
-    else :
-        print("Saving serects to /secret/secret.env")
-        data=get_secret(secret_name)
-        secret = json.loads(data)
-        secretFile.write("export " + prefix + "USERNAME="+"'"+ secret["username"]+"'"+ "\n")
-        secretFile.write("export " + prefix + "PASSWORD="+"'"+  secret["password"]+"'"+ "\n")
-        secretFile.write("export " + prefix + "HOST="+"'"+  secret["host"]+"'"+ "\n")
-        secretFile.write("export " + prefix + "PORT="+"'"+  str(secret["port"])+"'"+ "\n")
+    print("Saving", secret_name, "serects to", secretFile)
+    data=get_secret(secret_name)
+    secret = json.loads(data)
+    secretFile.write("export " + prefix + "USERNAME="+"'"+ secret["username"]+"'"+ "\n")
+    secretFile.write("export " + prefix + "PASSWORD="+"'"+  secret["password"]+"'"+ "\n")
+    secretFile.write("export " + prefix + "HOST="+"'"+  secret["host"]+"'"+ "\n")
+    secretFile.write("export " + prefix + "PORT="+"'"+  str(secret["port"])+"'"+ "\n")
     print("Done fetching ", secret_name)
 
 
 print("Running init container script")
 allSecrets = getSecretKeys()
-secretFile = open("/secret/secret.env","w")
-for (key, secret_name) in allSecrets.items():
-    prefix = key.split("_")[1]
-    loadSecret(prefix, secret_name, secretFile)
-secretFile.close()
+secretFileName = getSecretFileName()
+secretFile = open(secretFileName,"w")
+try:
+    for (key, secret_name) in allSecrets.items():
+        prefix = key.split("_")[1]
+        loadSecret(prefix, secret_name, secretFile)
+finally:
+    secretFile.close()
+    print("exiting init container script")
