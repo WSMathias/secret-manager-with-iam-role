@@ -3,6 +3,7 @@ import json, os, boto3, base64
 from botocore.exceptions import ClientError
 
 def getSecretKeys():
+    """Returns only the secret manager environment variables"""
     secretKeys = dict()
     for (key, value) in os.environ.items():
         if( key.startswith("SM_")):
@@ -25,7 +26,8 @@ def get_secret(secret_name):
     )
     try:
         get_secret_value_response = client.get_secret_value(
-            SecretId=secret_name
+            SecretId=secret_name,
+            VersionId="AWSCURRENT"
         )
     except ClientError as e:
         raise e
