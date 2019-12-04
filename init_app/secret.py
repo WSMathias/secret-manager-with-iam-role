@@ -56,6 +56,7 @@ def loadSecret(prefix, secret_name, secretFile):
     secretFile.write("export " + prefix + "PASSWORD="+"'"+  secret["password"]+"'"+ "\n")
     secretFile.write("export " + prefix + "HOST="+"'"+  secret["host"]+"'"+ "\n")
     secretFile.write("export " + prefix + "PORT="+"'"+  str(secret["port"])+"'"+ "\n")
+    secretFile.write("export " + prefix + "DATABASE="+"'"+  str(secret["database"])+"'"+ "\n")
     print("Done fetching ", secret_name)
 
 
