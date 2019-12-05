@@ -52,13 +52,9 @@ def loadSecret(prefix, secret_name, secretFile):
     #             "password": "8h?o[R;2qZMa)Tbq[Pt69AhjXFx#X$*>",
     #             "port": 3306
     #         }
-    secretFile.write("export " + prefix + "USERNAME="+"'"+ secret["username"]+"'"+ "\n")
-    secretFile.write("export " + prefix + "PASSWORD="+"'"+  secret["password"]+"'"+ "\n")
-    secretFile.write("export " + prefix + "HOST="+"'"+  secret["host"]+"'"+ "\n")
-    secretFile.write("export " + prefix + "PORT="+"'"+  str(secret["port"])+"'"+ "\n")
-    secretFile.write("export " + prefix + "DATABASE="+"'"+  str(secret["database"])+"'"+ "\n")
+    for key, value in secret.items():
+        secretFile.write("export " + prefix + key.upper() + "'" + value + "'" + "\n")
     print("Done fetching ", secret_name)
-
 
 print("Running init container script")
 allSecrets = getSecretKeys()
